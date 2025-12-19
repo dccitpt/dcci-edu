@@ -29,10 +29,11 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">카테고리</label>
                         <select id="category"
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 font-medium">
-                            <option value="📂 실무자 역량강화 교육">📂 실무자 역량강화 교육</option>
-                            <option value="🚢 FTA 실무 교육">🚢 FTA 실무 교육</option>
-                            <option value="🤖 재직자 AI 교육">🤖 재직자 AI 교육</option>
-                            <option value="기타">기타</option>
+                            <option value="실무자 역량강화 교육 > 세무/회계">실무자 역량강화 교육 > 세무/회계</option>
+                            <option value="실무자 역량강화 교육 > 인사/노무">실무자 역량강화 교육 > 인사/노무</option>
+                            <option value="실무자 역량강화 교육 > 경영일반">실무자 역량강화 교육 > 경영일반</option>
+                            <option value="재직자 AI 교육">재직자 AI 교육</option>
+                            <option value="FTA 실무 교육">FTA 실무 교육</option>
                         </select>
                     </div>
                     <div>
@@ -54,13 +55,13 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">일시 (Date Text)</label>
                         <input type="text" id="date" required
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="예: 3. 14(목) 14:00~18:00">
+                            placeholder="예: 2025. 3. 14(목) 14:00~18:00">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">장소 (Place)</label>
                         <input type="text" id="place" required
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            value="대구상공회의소 4층 중회의실2">
+                            placeholder="예: 대구상공회의소 4층 중회의실2">
                     </div>
                 </div>
 
@@ -69,7 +70,7 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">정원 (Capacity)</label>
                         <input type="number" id="capacity" required
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            value="40">
+                            placeholder="예: 40">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">신청 기한 (Deadline)</label>
@@ -83,7 +84,7 @@
                     <label class="block text-sm font-bold text-gray-700 mb-1">교육 대상 (Target)</label>
                     <input type="text" id="target"
                         class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        value="지역기업 임직원 등">
+                        placeholder="예: 지역기업 임직원 등">
                 </div>
 
                 <div>
@@ -111,20 +112,22 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">문의처 (Contact)</label>
                         <input type="text" id="contact"
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            value="기업지원부 (053-222-3109)">
+                            placeholder="예: 기업지원부 (053-222-3109)">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">교육비 안내 (Payment Info)</label>
                     <textarea id="paymentInfo" rows="2"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500">무료 (교재 및 수료증 제공)</textarea>
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 무료 (교재 및 수료증 제공)"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">기타 안내 (Other Info)</label>
                     <textarea id="otherInfo" rows="2"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500">주차장이 협소하오니 대중교통을 이용해 주시기 바랍니다.</textarea>
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 주차장이 협소하오니 대중교통을 이용해 주시기 바랍니다."></textarea>
                 </div>
 
                 <div class="pt-6 border-t flex justify-end">
