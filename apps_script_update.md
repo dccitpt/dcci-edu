@@ -1,37 +1,51 @@
-# Google Apps Script 업데이트 가이드 (v2.2 - 인원 카운트 수정)
+# Google Apps Script 업데이트 가이드 (v2.5 - J~M열 데이터 조회 및 Undefined 수정)
 
-신청 인원이 0명으로 뜨는 문제를 해결하기 위해, 과정명 비교 로직을 강화했습니다 (공백 제거 등).
-아래 코드로 스크립트를 **덮어쓰기** 하고 다시 **배포**해 주세요.
+**목표**:
+1. 관리자 페이지에서 **"undefined"**로 뜨는 문제를 해결합니다. (데이터가 비어있을 때 빈 문자열 처리)
+2. 신청자 명단에서 **J열(개인정보), K열(회원구분), L열(회비납부), M열(의원구분)**까지 모두 불러옵니다.
+
+### 1. 스크립트 수정 방법
+1. 구글 스프레드시트 **[확장 프로그램] > [Apps Script]**
+2. 기존 코드 **전체 삭제** 후 아래 코드로 **덮어쓰기**
+3. **[저장]** 클릭
+
+### 2. 배포 업데이트 (필수!)
+**반드시 버전을 올려서 새로 배포해야 합니다.**
+1. **[배포] > [새 배포]**
+2. 설명: "J~M열 조회 추가"
+3. **버전**: `새 버전` 선택
+4. **[배포]** 클릭 -> **새로운 URL 복사**
+
+---
+
+### [복사할 코드 (v2.5)]
 
 ```javascript
 /*
-  DCCI 교육센터 - 통합 스크립트 v2.2 (인원 카운트 상세 수정)
+  DCCI 교육센터 - 통합 스크립트 v2.5
+  - J~M열 (개인정보, 회원구분, 회비납부, 의원구분) 조회 추가
+  - 데이터 필드 undefined/null 방지 (|| "" 처리)
 */
 
-const ADMIN_PASSWORD = "dccitpt3102"; // ★ 비밀번호 확인
+const ADMIN_PASSWORD = "dccitpt3102"; 
 
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("COURSE_LIST");
   
   if (!sheet) {
-    return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "COURSE_LIST 시트가 없습니다." }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "COURSE_LIST 시트가 없습니다." })).setMimeType(ContentService.MimeType.JSON);
   }
 
+  // 1. 과정 목록 로드
   const data = sheet.getDataRange().getValues();
   const rows = data.slice(1);
-  
   let courses = {};
   
-  // 1. 과정 목록 로드
   rows.forEach(row => {
-    // ID(A열)가 있는 경우만 로드
     if(row[0]) { 
-      
-      // 날짜/시간 병합 처리
-      let dateStr = row[4]; // E열
-      if (!dateStr || dateStr === "") { dateStr = row[3]; } // D열 fallback
+      let dateStr = row[4]; 
+      if (!dateStr || dateStr === "") { dateStr = row[3]; } 
       
       if (Object.prototype.toString.call(dateStr) === '[object Date]') {
          const year = dateStr.getFullYear();
@@ -42,12 +56,12 @@ function doGet(e) {
 
       courses[row[0]] = {
         id: row[0],
-        category: row[1],
-        title: String(row[2]).trim(), // ★ 공백 제거 후 저장
-        date: dateStr,
-        place: row[5],
-        target: row[6],
-        goal: row[7],
+        category: row[1] || "",
+        title: String(row[2] || "").trim(),
+        date: dateStr || "",
+        place: row[5] || "",
+        target: row[6] || "", // ★ undefined 방지
+        goal: row[7] || "",   // ★ undefined 방지
         content: row[8] || "",
         instructor: row[9] || "",
         contact: row[10] || "",
@@ -55,35 +69,56 @@ function doGet(e) {
         otherInfo: row[12] || "",
         capacity: row[13] || 0,
         deadline: row[14] || "",
-        current: 0 
+        current: 0,
+        applicants: []
       };
     }
   });
   
-  // 2. 신청 인원 집계 (APPLICATION_LIST 확인)
+  // 2. 신청 인원 집계 및 명단 매핑 (J~M열 추가)
   const appSheet = ss.getSheetByName("APPLICATION_LIST");
   if(appSheet) {
-    const appData = appSheet.getRange(2, 1, appSheet.getLastRow(), appSheet.getLastColumn()).getValues(); // 빈 행 방지
-    // 혹은 간단히: const appData = appSheet.getDataRange().getValues().slice(1); 
-    
-    appData.forEach(row => {
-      // B열(인덱스 1)이 과정명이라고 가정
-      // 값이 비어있지 않은 경우만 체크
-      if(row[1]) {
-        const appliedCourseTitle = String(row[1]).trim(); // ★ 공백 제거 후 비교
-        
-        for (const id in courses) {
-          if (courses[id].title === appliedCourseTitle) {
-            courses[id].current = (courses[id].current || 0) + 1;
-            break; 
-          }
-        }
-      }
-    });
+    const appData = appSheet.getDataRange().getValues();
+    if(appData.length > 1) {
+       for(let i=1; i<appData.length; i++) {
+         const row = appData[i];
+         const appliedCourseTitle = String(row[1]).trim();
+         
+         for (const id in courses) {
+           if (courses[id].title === appliedCourseTitle) {
+             courses[id].current = (courses[id].current || 0) + 1;
+             
+             // ★ J(9), K(10), L(11), M(12) 열 데이터 매핑
+             courses[id].applicants.push({
+               timestamp: formatTimestamp(row[0]),
+               bizName: row[2] || "",
+               bizNo: row[3] || "",
+               dept: row[4] || "",
+               position: row[5] || "",
+               name: row[6] || "",
+               phone: row[7] || "",
+               email: row[8] || "",
+               privacy: row[9] || "",       // J열
+               memberType: row[10] || "",  // K열
+               feeStatus: row[11] || "",   // L열
+               councilType: row[12] || ""  // M열
+             });
+             break; 
+           }
+         }
+       }
+    }
   }
 
-  return ContentService.createTextOutput(JSON.stringify(courses))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(courses)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function formatTimestamp(ts) {
+  if (!ts) return "";
+  if (Object.prototype.toString.call(ts) === '[object Date]') {
+    return Utilities.formatDate(ts, "GMT+9", "yyyy. MM. dd HH:mm:ss");
+  }
+  return String(ts);
 }
 
 function doPost(e) {
@@ -94,53 +129,49 @@ function doPost(e) {
     const params = e.parameter;
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // 1. 교육 과정 등록
+    // 1. 등록
     if (params.action === "add_course") {
       if (params.password !== ADMIN_PASSWORD) return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "비밀번호 불일치" })).setMimeType(ContentService.MimeType.JSON);
-
       let sheet = ss.getSheetByName("COURSE_LIST");
       if (!sheet) { sheet = ss.insertSheet("COURSE_LIST"); sheet.appendRow(["ID", "Category", "Title", "Date", "Time", "Place", "Target", "Goal", "Content", "Instructor", "Contact", "PaymentInfo", "OtherInfo", "Capacity", "Deadline"]); }
-
       const newId = "CID_" + new Date().getTime().toString().substr(5) + Math.floor(Math.random() * 100);
-
-      sheet.appendRow([
-        newId, params.category, params.title, "", params.date, params.place, params.target, params.goal, params.content, params.instructor, params.contact, params.paymentInfo, params.otherInfo, params.capacity, params.deadline
-      ]);
-
+      sheet.appendRow([newId, params.category, params.title, "", params.date, params.place, params.target, params.goal, params.content, params.instructor, params.contact, params.paymentInfo, params.otherInfo, params.capacity, params.deadline]);
       return ContentService.createTextOutput(JSON.stringify({ result: "success", id: newId })).setMimeType(ContentService.MimeType.JSON);
     }
-    
-    // 2. 교육 참가 신청 (수식이 미리 걸려있어도 빈 행 찾아 입력)
+    // 2. 수정
+    else if (params.action === "update_course") {
+       if (params.password !== ADMIN_PASSWORD) return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "비밀번호 불일치" })).setMimeType(ContentService.MimeType.JSON);
+       const sheet = ss.getSheetByName("COURSE_LIST");
+       const data = sheet.getDataRange().getValues();
+       let rowIndex = -1;
+       for(let i=1; i<data.length; i++) { if(data[i][0] == params.id) { rowIndex = i + 1; break; } }
+       if(rowIndex === -1) return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "해당 과정을 찾을 수 없습니다." })).setMimeType(ContentService.MimeType.JSON);
+       
+       sheet.getRange(rowIndex, 2, 1, 14).setValues([[params.category, params.title, "", params.date, params.place, params.target, params.goal, params.content, params.instructor, params.contact, params.paymentInfo, params.otherInfo, params.capacity, params.deadline]]);
+       return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    // 3. 삭제
+    else if (params.action === "delete_course") {
+       if (params.password !== ADMIN_PASSWORD) return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "비밀번호 불일치" })).setMimeType(ContentService.MimeType.JSON);
+       const sheet = ss.getSheetByName("COURSE_LIST");
+       const data = sheet.getDataRange().getValues();
+       let rowIndex = -1;
+       for(let i=1; i<data.length; i++) { if(data[i][0] == params.id) { rowIndex = i + 1; break; } }
+       if(rowIndex === -1) return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: "해당 과정을 찾을 수 없습니다." })).setMimeType(ContentService.MimeType.JSON);
+       sheet.deleteRow(rowIndex);
+       return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    // 4. 신청
     else {
       let sheet = ss.getSheetByName("APPLICATION_LIST");
       if (!sheet) { sheet = ss.insertSheet("APPLICATION_LIST"); sheet.appendRow(["Timestamp", "Course", "BizName", "BizNo", "Dept", "Position", "Name", "Phone", "Email", "Privacy"]); }
-
-      // A열(Timestamp) 기준으로 데이터가 있는 마지막 행 찾기
-      // (appendRow는 수식이 있는 행을 데이터가 있는 것으로 간주하므로 사용하지 않음)
       const lastRow = sheet.getRange("A:A").getValues().filter(String).length; 
-      const nextRow = lastRow + 1; // 다음 빈 행
-
-      // A열~J열까지만 데이터 입력 (K, L열에 미리 적어둔 수식 보존)
-      // Timestamp 포맷팅 (시간까지 나오도록 문자열로 변환)
+      const nextRow = lastRow + 1;
       const now = new Date();
       const formattedDate = Utilities.formatDate(now, "GMT+9", "yyyy. M. d. HH:mm:ss");
-
-      sheet.getRange(nextRow, 1, 1, 10).setValues([[ 
-        formattedDate, 
-        params.course, 
-        params.bizName, 
-        params.bizNo, 
-        params.dept, 
-        params.position, 
-        params.name, 
-        params.phone, 
-        params.email, 
-        params.privacy 
-      ]]);
-
+      sheet.getRange(nextRow, 1, 1, 10).setValues([[formattedDate, params.course, params.bizName, params.bizNo, params.dept, params.position, params.name, params.phone, params.email, params.privacy]]);
       return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
     }
-
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({ result: "error", msg: error.toString() })).setMimeType(ContentService.MimeType.JSON);
   } finally {
