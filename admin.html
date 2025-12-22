@@ -17,127 +17,177 @@
 
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="max-w-4xl mx-auto py-10 px-4">
+    <div class="max-w-6xl mx-auto py-10 px-4">
         <div class="bg-white rounded-xl shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-8 border-b pb-4">🎓 교육 과정 등록 (관리자)</h1>
+            <h1 class="text-3xl font-bold text-gray-900 mb-8 pb-4">🎓 교육 과정 관리 (관리자)</h1>
 
-            <form id="courseForm" class="space-y-6">
+            <!-- 탭 네비게이션 -->
+            <div class="flex border-b border-gray-200 mb-8">
+                <button onclick="switchTab('register')" id="tab-register"
+                    class="py-2 px-4 text-blue-600 border-b-2 border-blue-600 font-bold focus:outline-none transition-colors">
+                    교육 과정 등록
+                </button>
+                <button onclick="switchTab('status')" id="tab-status"
+                    class="py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors">
+                    신청자 현황
+                </button>
+            </div>
 
-                <!-- 기본 정보 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">카테고리</label>
-                        <select id="category"
-                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 font-medium">
-                            <option value="실무자 역량강화 교육 > 세무/회계">실무자 역량강화 교육 > 세무/회계</option>
-                            <option value="실무자 역량강화 교육 > 인사/노무">실무자 역량강화 교육 > 인사/노무</option>
-                            <option value="실무자 역량강화 교육 > 경영일반">실무자 역량강화 교육 > 경영일반</option>
-                            <option value="재직자 AI 교육">재직자 AI 교육</option>
-                            <option value="FTA 실무 교육">FTA 실무 교육</option>
-                        </select>
+            <!-- 섹션 1: 교육 과정 등록 (기존 폼) -->
+            <div id="section-register">
+                <form id="courseForm" class="space-y-6">
+
+                    <!-- 기본 정보 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">카테고리</label>
+                            <select id="category"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 font-medium">
+                                <option value="실무자 역량강화 교육 > 세무/회계">실무자 역량강화 교육 > 세무/회계</option>
+                                <option value="실무자 역량강화 교육 > 인사/노무">실무자 역량강화 교육 > 인사/노무</option>
+                                <option value="실무자 역량강화 교육 > 경영일반">실무자 역량강화 교육 > 경영일반</option>
+                                <option value="재직자 AI 교육">재직자 AI 교육</option>
+                                <option value="FTA 실무 교육">FTA 실무 교육</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">관리자 비밀번호</label>
+                            <input type="password" id="adminPassword" required placeholder="스크립트에 설정된 비밀번호"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">관리자 비밀번호</label>
-                        <input type="password" id="adminPassword" required placeholder="스크립트에 설정된 비밀번호"
-                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
-                    </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">과정명 (Title)</label>
-                    <input type="text" id="title" required
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 2025년 제1차 원산지 관리 실무">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">일시 (Date Text)</label>
-                        <input type="text" id="date" required
+                        <label class="block text-sm font-bold text-gray-700 mb-1">과정명 (Title)</label>
+                        <input type="text" id="title" required
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="예: 2025. 3. 14(목) 14:00~18:00">
+                            placeholder="예: 2025년 제1차 원산지 관리 실무">
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">일시 (Date Text)</label>
+                            <input type="text" id="date" required
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                                placeholder="예: 2025. 3. 14(목) 14:00~18:00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">장소 (Place)</label>
+                            <input type="text" id="place" required
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                                placeholder="예: 대구상공회의소 4층 중회의실2">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">정원 (Capacity)</label>
+                            <input type="number" id="capacity" required
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                                placeholder="예: 40">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">신청 기한 (Deadline)</label>
+                            <input type="date" id="deadline" required
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- 상세 정보 -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">장소 (Place)</label>
-                        <input type="text" id="place" required
+                        <label class="block text-sm font-bold text-gray-700 mb-1">교육 대상 (Target)</label>
+                        <input type="text" id="target"
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="예: 대구상공회의소 4층 중회의실2">
+                            placeholder="예: 지역기업 임직원 등">
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">정원 (Capacity)</label>
-                        <input type="number" id="capacity" required
+                        <label class="block text-sm font-bold text-gray-700 mb-1">교육 목표 (Goal)</label>
+                        <textarea id="goal" rows="3"
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="예: 40">
+                            placeholder="교육의 목적 및 기대효과"></textarea>
                     </div>
+
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">신청 기한 (Deadline)</label>
-                        <input type="date" id="deadline" required
-                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <!-- 상세 정보 -->
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">교육 대상 (Target)</label>
-                    <input type="text" id="target"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 지역기업 임직원 등">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">교육 목표 (Goal)</label>
-                    <textarea id="goal" rows="3"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="교육의 목적 및 기대효과"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">주요 내용 (Content)</label>
-                    <textarea id="content" rows="5" required
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="- 내용 1&#10;- 내용 2&#10;- 내용 3"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">강사 (Instructor)</label>
-                        <input type="text" id="instructor"
+                        <label class="block text-sm font-bold text-gray-700 mb-1">주요 내용 (Content)</label>
+                        <textarea id="content" rows="5" required
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="소속 및 성명">
+                            placeholder="- 내용 1&#10;- 내용 2&#10;- 내용 3"></textarea>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">강사 (Instructor)</label>
+                            <input type="text" id="instructor"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                                placeholder="소속 및 성명">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">문의처 (Contact)</label>
+                            <input type="text" id="contact"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                                placeholder="예: 기업지원부 (053-222-3109)">
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">문의처 (Contact)</label>
-                        <input type="text" id="contact"
+                        <label class="block text-sm font-bold text-gray-700 mb-1">교육비 안내 (Payment Info)</label>
+                        <textarea id="paymentInfo" rows="2"
                             class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                            placeholder="예: 기업지원부 (053-222-3109)">
+                            placeholder="예: 무료 (교재 및 수료증 제공)"></textarea>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">교육비 안내 (Payment Info)</label>
-                    <textarea id="paymentInfo" rows="2"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 무료 (교재 및 수료증 제공)"></textarea>
-                </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">기타 안내 (Other Info)</label>
+                        <textarea id="otherInfo" rows="2"
+                            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
+                            placeholder="예: 주차장이 협소하오니 대중교통을 이용해 주시기 바랍니다."></textarea>
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">기타 안내 (Other Info)</label>
-                    <textarea id="otherInfo" rows="2"
-                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 주차장이 협소하오니 대중교통을 이용해 주시기 바랍니다."></textarea>
-                </div>
+                    <div class="pt-6 border-t flex justify-end">
+                        <button type="button" onclick="submitCourse()"
+                            class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow hover:bg-blue-800 transition-colors transform hover:-translate-y-0.5">
+                            과정 등록하기
+                        </button>
+                    </div>
 
-                <div class="pt-6 border-t flex justify-end">
-                    <button type="button" onclick="submitCourse()"
-                        class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow hover:bg-blue-800 transition-colors transform hover:-translate-y-0.5">
-                        과정 등록하기
+                </form>
+            </div>
+
+            <!-- 섹션 2: 신청자 현황 (신규) -->
+            <div id="section-status" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">📊 현재 접수중인 교육과정 현황</h2>
+                        <p class="text-sm text-gray-500 mt-1">현재 접수 중이거나 마감 임박한 과정의 신청 현황을 실시간으로 확인합니다.</p>
+                    </div>
+                    <button onclick="fetchStatus()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold">
+                        ↻ 새로고침
                     </button>
                 </div>
+                
+                <div class="overflow-x-auto border rounded-xl">
+                    <table class="min-w-full divide-y divide-gray-200 whitespace-nowrap">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">상태</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">과정명</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">일시</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">현황 (신청/정원)</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">신청기한</th>
+                            </tr>
+                        </thead>
+                        <tbody id="status-body" class="bg-white divide-y divide-gray-200 text-sm">
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                    데이터를 불러오려면 '새로고침' 버튼을 누르거나 탭을 다시 클릭하세요.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-            </form>
         </div>
     </div>
 
@@ -145,8 +195,118 @@
         // ★★★ index.html과 동일한 URL 사용 ★★★
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwHAGck5vVpCIMmmfQcvlxX4TTKGjt6CC9Z9stc9qcC3o9oFraE6z_VDOobjH9oPK4q1A/exec';
 
+        // 탭 전환 기능
+        function switchTab(tabId) {
+            // 버튼 스타일 초기화
+            document.getElementById('tab-register').className = "py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors";
+            document.getElementById('tab-register').classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+            
+            document.getElementById('tab-status').className = "py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors";
+            document.getElementById('tab-status').classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+
+            // 선택된 탭 스타일 적용
+            const activeClass = "text-blue-600 border-b-2 border-blue-600 font-bold".split(' ');
+            document.getElementById('tab-' + tabId).classList.add(...activeClass);
+            document.getElementById('tab-' + tabId).classList.remove('text-gray-500', 'font-medium');
+
+            // 섹션 표시/숨김
+            document.getElementById('section-register').classList.add('hidden');
+            document.getElementById('section-status').classList.add('hidden');
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+
+            // 현황 탭 클릭 시 데이터 로드
+            if (tabId === 'status') {
+                fetchStatus();
+            }
+        }
+
+        // 현황 데이터 불러오기
+        function fetchStatus() {
+            const tbody = document.getElementById('status-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-blue-600 font-bold"><span class="animate-pulse">데이터를 불러오는 중입니다...</span></td></tr>';
+
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    tbody.innerHTML = '';
+                    if (data.result === 'error') {
+                        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500 font-bold">오류: ${data.msg}</td></tr>`;
+                        return;
+                    }
+
+                    const now = new Date();
+                    let hasData = false;
+
+                    // 데이터를 배열로 변환 후 정렬 (접수중 우선, 날짜순)
+                    const courses = Object.keys(data).map(key => data[key]);
+                    
+                    // 접수중인 과정만 필터링 (원하면 모든 과정 보기로 변경 가능)
+                    courses.forEach(item => {
+                        // 날짜 및 상태 계산
+                        let statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">접수중</span>`;
+                        const cap = parseInt(item.capacity || 0);
+                        const cur = parseInt(item.current || 0);
+                        let isFull = false;
+
+                        if (cap > 0 && cur >= cap) { 
+                            isFull = true; 
+                            statusBadge = `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">정원마감</span>`; 
+                        }
+                        
+                        let isExpired = false;
+                        if (item.deadline) {
+                            const deadlineDate = new Date(item.deadline);
+                            deadlineDate.setHours(23, 59, 59, 999);
+                            if (now > deadlineDate) { 
+                                isExpired = true;
+                                statusBadge = `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">기한마감</span>`; 
+                            }
+                        }
+
+                        // 접수중이거나, 마감되었지만 최근인 것들 등 정책에 따라 필터링 가능. 
+                        // 일단은 모든 목록을 보여주되 정렬을 '접수중'이 위로 오게 할 수도 있으나, 여기서는 단순 리스트업.
+                        
+                        // 사용자의 요청: "현재 접수중인 교육과정, 접수중인 교육과정에 신청자 현황을 한번에 볼수있는 페이지"
+                        // 따라서 접수 종료된 건 굳이 안 보여줘도 되지만, 일단 다 보여주고 상태 뱃지로 구분.
+
+                        hasData = true;
+
+                        const row = `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">${statusBadge}</td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-bold text-gray-900">${item.title}</div>
+                                    <div class="text-xs text-gray-500">${item.category}</div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500 text-sm">${item.date}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2 max-w-[100px]">
+                                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${cap > 0 ? Math.min((cur/cap)*100, 100) : 0}%"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-gray-700">${cur} / ${cap > 0 ? cap : '-'}명</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500 text-sm">
+                                    ${item.deadline ? item.deadline.split('T')[0] : '상시/별도'}
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+
+                    if (!hasData) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">현재 표시할 교육 과정 데이터가 없습니다.</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">데이터 로드 실패 (관리자 문의)</td></tr>`;
+                });
+        }
+
         function submitCourse() {
-            const btn = document.querySelector('button');
+            const btn = document.querySelector('button[onclick="submitCourse()"]');
             const originalText = btn.innerText;
 
             if (!confirm("이대로 교육 과정을 등록하시겠습니까?")) return;
@@ -155,10 +315,9 @@
             btn.disabled = true;
 
             const formData = new FormData();
-            formData.append('action', 'add_course'); // 액션 지정
+            formData.append('action', 'add_course');
             formData.append('password', document.getElementById('adminPassword').value);
 
-            // 데이터 매핑
             formData.append('category', document.getElementById('category').value);
             formData.append('title', document.getElementById('title').value);
             formData.append('date', document.getElementById('date').value);
