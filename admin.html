@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 페이지 - 교육 과정 등록</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
@@ -18,65 +17,22 @@
 
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- 로그인 폼 (비로그인 시 노출) -->
-    <div id="login-container" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <span class="text-4xl">🔒</span>
-                <h2 class="text-2xl font-bold text-gray-900 mt-4">관리자 로그인</h2>
-                <p class="text-gray-500 mt-2 text-sm">교육센터 관리자 계정으로 접속하세요.</p>
-            </div>
-            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">이메일</label>
-                    <input type="email" id="login-email" required
-                        class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="admin@example.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">비밀번호</label>
-                    <input type="password" id="login-password" required
-                        class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="••••••••">
-                </div>
-                <button type="submit" id="btn-login"
-                    class="w-full py-3 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800 transition-colors shadow-lg">
-                    로그인 확인
-                </button>
-            </form>
-            <p id="login-error" class="text-red-500 text-sm font-bold text-center mt-4 hidden"></p>
-        </div>
-    </div>
-
-    <!-- 메인 컨텐츠 (로그인 시 노출) -->
-    <div id="main-content" class="max-w-7xl mx-auto py-10 px-4 hidden">
+    <div class="max-w-6xl mx-auto py-10 px-4">
         <div class="bg-white rounded-xl shadow-lg p-8">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-200">
-                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-                    🎓 교육 과정 관리 <span
-                        class="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Admin</span>
-                </h1>
-                <div class="flex items-center space-x-4 mt-4 md:mt-0">
-                    <span id="user-display" class="text-sm text-gray-600 font-medium"></span>
-                    <button onclick="handleLogout()"
-                        class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-bold text-sm transition-colors">
-                        로그아웃
-                    </button>
-                </div>
-            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-8 pb-4">🎓 교육 과정 관리 (관리자)</h1>
 
             <!-- 탭 네비게이션 -->
-            <div class="flex border-b border-gray-200 mb-8 overflow-x-auto">
+            <div class="flex border-b border-gray-200 mb-8">
                 <button onclick="switchTab('status')" id="tab-status"
-                    class="py-2 px-4 whitespace-nowrap text-blue-600 border-b-2 border-blue-600 font-bold focus:outline-none transition-colors">
+                    class="py-2 px-4 text-blue-600 border-b-2 border-blue-600 font-bold focus:outline-none transition-colors">
                     신청자 현황
                 </button>
                 <button onclick="switchTab('register')" id="tab-register"
-                    class="py-2 px-4 whitespace-nowrap text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors">
+                    class="py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors">
                     교육 과정 등록
                 </button>
                 <button onclick="switchTab('manage')" id="tab-manage"
-                    class="py-2 px-4 whitespace-nowrap text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors">
+                    class="py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors">
                     교육 과정 관리 (수정/삭제)
                 </button>
             </div>
@@ -86,7 +42,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">📊 현재 접수중인 교육과정 현황</h2>
-                        <p class="text-sm text-gray-500 mt-1">실시간 데이터베이스(Supabase)에서 데이터를 불러옵니다.</p>
+                        <p class="text-sm text-gray-500 mt-1">현재 접수 중이거나 마감 임박한 과정의 신청 현황을 실시간으로 확인합니다.</p>
                     </div>
                     <button onclick="fetchStatus()"
                         class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold">
@@ -115,7 +71,8 @@
                                     신청기한</th>
                             </tr>
                         </thead>
-                        <tbody id="status-body" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
+                        <tbody id="status-body" class="bg-white divide-y divide-gray-200 text-sm">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -133,8 +90,9 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm text-yellow-700">현재 <span id="edit-course-title"
-                                        class="font-bold"></span> 과정을 수정 중입니다.</p>
+                                <p class="text-sm text-yellow-700">
+                                    현재 <span id="edit-course-title" class="font-bold"></span> 과정을 수정 중입니다.
+                                </p>
                             </div>
                         </div>
                         <button onclick="cancelEdit()"
@@ -144,6 +102,7 @@
                 </div>
 
                 <form id="courseForm" class="space-y-6">
+
                     <!-- 기본 정보 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -156,6 +115,11 @@
                                 <option value="재직자 AI 교육">재직자 AI 교육</option>
                                 <option value="FTA 실무 교육">FTA 실무 교육</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">관리자 비밀번호</label>
+                            <input type="password" id="adminPassword" required placeholder="스크립트에 설정된 비밀번호"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
                         </div>
                     </div>
 
@@ -252,6 +216,7 @@
                             과정 등록하기
                         </button>
                     </div>
+
                 </form>
             </div>
 
@@ -283,7 +248,8 @@
                                     관리</th>
                             </tr>
                         </thead>
-                        <tbody id="manage-body" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
+                        <tbody id="manage-body" class="bg-white divide-y divide-gray-200 text-sm">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -292,101 +258,35 @@
     </div>
 
     <script>
-        // =========================================================================
-        // [Supabase 설정]
-        // =========================================================================
-        const SUPABASE_URL = "https://lpriczrnijdjtveumnna.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_FbKcsZiMjakjpvYp528MnQ_opGqbmoI";
-        // =========================================================================
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz1PWE-smF4alEMayWn_5WfLWuw6xprd3SDlFX8FinpvdZ6vEz5BI6dzD-mWrWxuWdy/exec';
+        let allCourses = {}; // 데이터 저장용
+        let editingCourseId = null; // 현재 수정 중인 ID
 
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-        let allCourses = [];
-        let editingCourseId = null;
+        // 초기 로드 시 현황 조회
+        window.onload = function () {
+            fetchStatus();
+        };
 
-        if (!supabase) {
-            alert("Supabase 라이브러리가 로드되지 않았습니다. CDN 연결을 확인하세요.");
-        }
-
-        // 초기화: 세션 확인
-        window.addEventListener('DOMContentLoaded', async () => {
-            // 1. 세션 체크
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                showMainContent(session.user);
-            } else {
-                showLoginForm();
-            }
-
-            // 2. Auth 상태 변경 감지
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (session) showMainContent(session.user);
-                else showLoginForm();
-            });
-        });
-
-        // 화면 전환 함수
-        function showLoginForm() {
-            document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('main-content').classList.add('hidden');
-        }
-
-        function showMainContent(user) {
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-display').innerText = user.email;
-            fetchStatus(); // 데이터 로드
-        }
-
-        // 로그인 처리
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const btn = document.getElementById('btn-login');
-            const err = document.getElementById('login-error');
-
-            btn.disabled = true;
-            btn.innerText = "로그인 중...";
-            err.classList.add('hidden');
-
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                err.innerText = "로그인 실패: " + error.message;
-                err.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "로그인 확인";
-            } else {
-                // 성공 시 onAuthStateChange가 자동으로 처리
-            }
-        }
-
-        // 로그아웃 처리
-        async function handleLogout() {
-            if (confirm("로그아웃 하시겠습니까?")) {
-                await supabase.auth.signOut();
-                window.location.reload();
-            }
-        }
-
-        // 탭 전환
         function switchTab(tabId) {
+            // 버튼 스타일 초기화
             ['register', 'status', 'manage'].forEach(id => {
                 const btn = document.getElementById('tab-' + id);
-                const section = document.getElementById('section-' + id);
-                if (btn && section) {
-                    btn.className = "py-2 px-4 whitespace-nowrap text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors";
+                if (btn) {
+                    btn.className = "py-2 px-4 text-gray-500 font-medium hover:text-gray-700 focus:outline-none transition-colors";
                     btn.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'font-bold');
-                    section.classList.add('hidden');
                 }
+                const section = document.getElementById('section-' + id);
+                if (section) section.classList.add('hidden');
             });
 
-            const activeBtn = document.getElementById('tab-' + tabId);
-            const activeSection = document.getElementById('section-' + tabId);
-
-            if (activeBtn) {
-                activeBtn.className = "py-2 px-4 whitespace-nowrap text-blue-600 border-b-2 border-blue-600 font-bold focus:outline-none transition-colors";
+            // 선택된 탭 활성화
+            const activeHeader = document.getElementById('tab-' + tabId);
+            if (activeHeader) {
+                activeHeader.classList.remove('text-gray-500', 'font-medium');
+                activeHeader.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'font-bold');
             }
+
+            const activeSection = document.getElementById('section-' + tabId);
             if (activeSection) activeSection.classList.remove('hidden');
 
             if (tabId === 'status') fetchStatus();
@@ -394,26 +294,12 @@
         }
 
         // --- 기능 1: 과정 등록/수정 ---
-        async function submitCourse() {
+        function submitCourse() {
             const btn = document.getElementById('btn-submit');
             const originalText = btn.innerText;
+            const pwd = document.getElementById('adminPassword').value;
 
-            // 필드 값 가져오기
-            const courseData = {
-                category: document.getElementById('category').value,
-                title: document.getElementById('title').value,
-                date: document.getElementById('date').value,
-                place: document.getElementById('place').value,
-                capacity: parseInt(document.getElementById('capacity').value) || 0,
-                deadline: document.getElementById('deadline').value,
-                target: document.getElementById('target').value,
-                goal: document.getElementById('goal').value,
-                content: document.getElementById('content').value,
-                instructor: document.getElementById('instructor').value,
-                contact: document.getElementById('contact').value,
-                payment_info: document.getElementById('paymentInfo').value, // snake_case 확인
-                other_info: document.getElementById('otherInfo').value
-            };
+            if (!pwd) return alert('관리자 비밀번호를 입력해주세요.');
 
             const actionType = editingCourseId ? "수정" : "등록";
             if (!confirm(`이대로 교육 과정을 ${actionType}하시겠습니까?`)) return;
@@ -421,68 +307,86 @@
             btn.innerText = "처리 중...";
             btn.disabled = true;
 
-            let error;
-            if (editingCourseId) {
-                // Update
-                const { error: updateError } = await supabase.from('courses').update(courseData).eq('id', editingCourseId);
-                error = updateError;
-            } else {
-                // Insert
-                const { error: insertError } = await supabase.from('courses').insert([courseData]);
-                error = insertError;
-            }
+            const formData = new FormData();
+            formData.append('action', editingCourseId ? 'update_course' : 'add_course');
+            if (editingCourseId) formData.append('id', editingCourseId);
+            formData.append('password', pwd);
 
-            if (error) {
-                alert(`⛔ ${actionType} 실패: ` + error.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-            } else {
-                alert(`✅ 교육 과정이 성공적으로 ${actionType}되었습니다!`);
-                if (editingCourseId) cancelEdit();
-                else document.getElementById('courseForm').reset();
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            // 데이터 매핑
+            ['category', 'title', 'date', 'place', 'capacity', 'deadline', 'target', 'goal', 'content', 'instructor', 'contact', 'paymentInfo', 'otherInfo'].forEach(field => {
+                const el = document.getElementById(field);
+                if (el) formData.append(field, el.value);
+            });
+
+            const data = new URLSearchParams(formData);
+
+            fetch(scriptURL, { method: 'POST', body: data })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.result === 'success') {
+                        alert(`✅ 교육 과정이 성공적으로 ${actionType}되었습니다!`);
+                        if (editingCourseId) cancelEdit(); // 수정 모드 종료
+                        else {
+                            document.getElementById('courseForm').reset();
+                            document.getElementById('adminPassword').value = pwd; // 비밀번호는 유지 편의성
+                        }
+                    } else {
+                        alert(`⛔ ${actionType} 실패: ` + result.msg);
+                    }
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    alert('서버 통신 오류가 발생했습니다.');
+                    console.error(error);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
         }
 
         // --- 기능 2: 신청자 현황 조회 ---
-        async function fetchStatus() {
+        function fetchStatus() {
             const tbody = document.getElementById('status-body');
             tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-blue-600 font-bold"><span class="animate-pulse">데이터를 불러오는 중입니다...</span></td></tr>';
 
-            // applicants -> education_apply로 변경
-            const { data, error } = await supabase
-                .from('courses')
-                .select(`
-                    *,
-                    education_apply (*)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500 font-bold">오류: ${error.message}</td></tr>`;
-                return;
-            }
-
-            renderStatusTable(data, tbody);
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => renderStatusTable(data, tbody))
+                .catch(err => handleError(tbody, err));
         }
 
-        function renderStatusTable(courses, tbody) {
+        function renderStatusTable(data, tbody) {
             tbody.innerHTML = '';
-            if (!courses || courses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">데이터가 없습니다.</td></tr>';
+            if (data.result === 'error') {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500 font-bold">오류: ${data.msg}</td></tr>`;
                 return;
             }
 
             const now = new Date();
+            let hasData = false;
+
+            // 1. 날짜순 정렬 (오름차순)
+            const courses = Object.keys(data).map(key => data[key]).sort((a, b) => {
+                const parseDate = (str) => {
+                    try {
+                        const parts = str.match(/(\d{4})[\.\s]+(\d{1,2})[\.\s]+(\d{1,2})/);
+                        if (parts) return new Date(`${parts[1]}-${parts[2]}-${parts[3]}`);
+                        return new Date(9999, 11, 31); // 파싱 실패시 뒤로
+                    } catch (e) { return new Date(9999, 11, 31); }
+                };
+                return parseDate(a.date) - parseDate(b.date);
+            });
+
+            if (courses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">데이터가 없습니다.</td></tr>';
+                return;
+            }
 
             courses.forEach(item => {
-                // education_apply 데이터 사용
-                const applicants = item.education_apply || [];
-                const cur = applicants.length; // 신청자 수 자동 집계
-                const cap = item.capacity;
-
                 let statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">접수중</span>`;
+                const cap = parseInt(item.capacity || 0);
+                const cur = parseInt(item.current || 0);
+
                 if (cap > 0 && cur >= cap) statusBadge = `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">정원마감</span>`;
 
                 if (item.deadline) {
@@ -491,35 +395,48 @@
                     if (now > deadlineDate) statusBadge = `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">기한마감</span>`;
                 }
 
-                // 신청자 명단 HTML (테이블 필드명 수정: education_apply 기준)
+                // 신청자 명단 HTML 생성 (J~M열 추가)
                 let applicantsHtml = '';
-                if (applicants.length > 0) {
+                if (item.applicants && item.applicants.length > 0) {
                     applicantsHtml = `
                         <div class="bg-gray-50 p-4 rounded-lg m-4 border border-gray-200">
-                            <h4 class="font-bold text-gray-700 mb-2">📋 신청자 명단 (${applicants.length}명)</h4>
+                            <h4 class="font-bold text-gray-700 mb-2">📋 신청자 명단 (${item.applicants.length}명)</h4>
                             <div class="overflow-x-auto">
                                 <table class="min-w-full text-xs text-left text-gray-500">
                                     <thead class="bg-gray-100 text-gray-700 font-bold border-b">
                                         <tr>
-                                            <th class="px-3 py-2 whitespace-nowrap">신청일시</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">시간</th>
                                             <th class="px-3 py-2 whitespace-nowrap">회사명</th>
                                             <th class="px-3 py-2 whitespace-nowrap">사업자번호</th>
                                             <th class="px-3 py-2 whitespace-nowrap">부서/직위</th>
                                             <th class="px-3 py-2 whitespace-nowrap">성명</th>
                                             <th class="px-3 py-2 whitespace-nowrap">연락처</th>
                                             <th class="px-3 py-2 whitespace-nowrap">이메일</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">개인정보</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">회원구분</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">회비납부</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">의원구분</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white">
-                                        ${applicants.map(app => `
+                                        ${item.applicants.map(app => `
                                             <tr class="hover:bg-blue-50">
-                                                <td class="px-3 py-2 whitespace-nowrap">${new Date(app.created_at).toLocaleString()}</td>
-                                                <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900">${app.company || '-'}</td>
-                                                <td class="px-3 py-2 whitespace-nowrap">${app.biz_no || '-'}</td>
-                                                <td class="px-3 py-2 whitespace-nowrap">${app.dept || ''} ${app.position || ''}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.timestamp}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900">${app.bizName}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.bizNo}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.dept} ${app.position}</td>
                                                 <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-900">${app.name}</td>
                                                 <td class="px-3 py-2 whitespace-nowrap">${app.phone}</td>
                                                 <td class="px-3 py-2 whitespace-nowrap">${app.email}</td>
+                                                
+                                                <!-- 추가 컬럼 J~M (배경색 구분) -->
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 text-gray-600">${app.privacy}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 font-semibold text-blue-600">${app.memberType || '-'}</td>
+                                                
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 font-bold ${(app.feeStatus === '미납' || app.feeStatus === '면제') ? 'text-red-500' : 'text-green-600'
+                        }">${app.feeStatus || '-'}</td>
+                                                
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 text-gray-700">${app.councilType || '-'}</td>
                                             </tr>
                                         `).join('')}
                                     </tbody>
@@ -549,7 +466,7 @@
                                 <span class="text-sm font-bold text-gray-700">${cur} / ${cap > 0 ? cap : '-'}명</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-gray-500 text-sm">${item.deadline || '상시'}</td>
+                        <td class="px-6 py-4 text-gray-500 text-sm">${item.deadline ? item.deadline.split('T')[0] : '상시/별도'}</td>
                     </tr>
                     <tr id="detail-${item.id}" class="hidden bg-gray-50 border-b">
                         <td colspan="5" class="p-0">
@@ -564,27 +481,33 @@
             const icon = document.getElementById(`icon-${id}`);
             if (detailRow) {
                 detailRow.classList.toggle('hidden');
-                if (icon) icon.classList.toggle('rotate-180');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
             }
         }
 
         // --- 기능 3: 관리 (수정/삭제) ---
-        async function fetchManage() {
+        function fetchManage() {
             const tbody = document.getElementById('manage-body');
             tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-blue-600 font-bold"><span class="animate-pulse">데이터를 불러오는 중입니다...</span></td></tr>';
 
-            const { data, error } = await supabase.from('courses').select('*').order('created_at', { ascending: false });
-
-            if (error) {
-                tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-red-500">불러오기 실패</td></tr>';
-            } else {
-                allCourses = data; // 전역 저장
-                renderManageTable(data, tbody);
-            }
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    allCourses = data; // 데이터 전역 저장
+                    renderManageTable(data, tbody);
+                })
+                .catch(err => {
+                    console.error("Error fetching for manage:", err);
+                    tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-red-500">불러오기 실패</td></tr>';
+                });
         }
 
-        function renderManageTable(courses, tbody) {
+        function renderManageTable(data, tbody) {
             tbody.innerHTML = '';
+            const courses = Object.keys(data).map(key => data[key]);
+
             if (courses.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-gray-500">데이터가 없습니다.</td></tr>';
                 return;
@@ -606,27 +529,32 @@
             });
         }
 
+        // 수정 모드 진입
         function loadCourseForEdit(id) {
-            const data = allCourses.find(c => c.id === id);
+            const data = allCourses[id];
             if (!data) return alert('정보를 찾을 수 없습니다.');
 
             editingCourseId = id;
+
+            // 탭 전환
             switchTab('register');
 
+            // 폼 채우기
             document.getElementById('category').value = data.category;
             document.getElementById('title').value = data.title;
             document.getElementById('date').value = data.date;
             document.getElementById('place').value = data.place;
             document.getElementById('capacity').value = data.capacity;
-            document.getElementById('deadline').value = data.deadline;
+            document.getElementById('deadline').value = data.deadline ? data.deadline.split('T')[0] : '';
             document.getElementById('target').value = data.target;
             document.getElementById('goal').value = data.goal;
             document.getElementById('content').value = data.content;
             document.getElementById('instructor').value = data.instructor;
             document.getElementById('contact').value = data.contact;
-            document.getElementById('paymentInfo').value = data.payment_info;
-            document.getElementById('otherInfo').value = data.other_info;
+            document.getElementById('paymentInfo').value = data.paymentInfo;
+            document.getElementById('otherInfo').value = data.otherInfo;
 
+            // UI 변경
             document.getElementById('edit-header').classList.remove('hidden');
             document.getElementById('edit-course-title').innerText = data.title;
             document.getElementById('btn-submit').innerText = '교육 과정 수정하기';
@@ -636,28 +564,48 @@
             window.scrollTo(0, 0);
         }
 
+        // 수정 취소
         function cancelEdit() {
             editingCourseId = null;
             document.getElementById('courseForm').reset();
             document.getElementById('edit-header').classList.add('hidden');
+
             const btn = document.getElementById('btn-submit');
             btn.innerText = '교육 과정 등록하기';
-            btn.classList.add('bg-blue-900', 'hover:bg-blue-800');
             btn.classList.remove('bg-yellow-600', 'hover:bg-yellow-500');
+            btn.classList.add('bg-blue-900', 'hover:bg-blue-800');
         }
 
-        async function deleteCourse(id) {
+        // 삭제
+        function deleteCourse(id) {
+            const pwd = prompt("삭제하려면 관리자 비밀번호를 입력하세요.");
+            if (!pwd) return;
+
             if (!confirm("정말로 이 과정을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")) return;
 
-            const { error } = await supabase.from('courses').delete().eq('id', id);
+            const formData = new FormData();
+            formData.append('action', 'delete_course');
+            formData.append('id', id);
+            formData.append('password', pwd);
 
-            if (error) {
-                alert('⛔ 삭제 실패: ' + error.message);
-            } else {
-                alert('🗑️ 삭제되었습니다.');
-                fetchManage();
-            }
+            fetch(scriptURL, { method: 'POST', body: new URLSearchParams(formData) })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.result === 'success') {
+                        alert('🗑️ 삭제되었습니다.');
+                        fetchManage(); // 목록 갱신
+                    } else {
+                        alert('⛔ 삭제 실패: ' + result.msg);
+                    }
+                })
+                .catch(err => alert('오류 발생: ' + err));
         }
+
+        function handleError(tbody, err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">데이터 로드 실패</td></tr>`;
+        }
+
     </script>
 </body>
 

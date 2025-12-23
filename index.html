@@ -13,7 +13,6 @@
     <meta property="og:url" content="https://dccitpt.github.io/dcci-edu/">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         /* 폰트 설정 (Noto Sans KR) */
@@ -195,8 +194,6 @@
                         class="text-blue-300 font-bold text-xs sm:text-sm tracking-wider uppercase mb-1 block">카테고리</span>
                     <h1 id="detail-title" class="text-2xl sm:text-3xl font-bold text-white tracking-tight break-keep">교육
                         제목</h1>
-                    <!-- 과정 ID를 저장할 히든 필드 -->
-                    <input type="hidden" id="detail-id">
                 </div>
                 <div class="p-6 sm:p-8">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 border-l-4 border-blue-900 pl-3">교육 개요</h3>
@@ -286,7 +283,6 @@
                 </div>
                 <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <form id="applyForm">
-                        <input type="hidden" id="modalCourseId">
                         <div class="space-y-4">
                             <div><label class="block text-sm font-bold text-gray-700">신청 과정</label><input type="text"
                                     id="modalCourseTitle"
@@ -353,21 +349,12 @@
     </div>
 
     <script>
-        // =========================================================================
-        // [Supabase 설정]
-        // =========================================================================
-        const SUPABASE_URL = "https://lpriczrnijdjtveumnna.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_FbKcsZiMjakjpvYp528MnQ_opGqbmoI";
-        // =========================================================================
+        // ★★★ 과장님이 방금 배포하신 최신 앱스 스크립트 URL 확인 필요 ★★★
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz1PWE-smF4alEMayWn_5WfLWuw6xprd3SDlFX8FinpvdZ6vEz5BI6dzD-mWrWxuWdy/exec';
 
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
         let courseData = {};
         const loadingSpinner = document.getElementById('loading-spinner');
         const scheduleBody = document.getElementById('schedule-body');
-
-        if (!supabase) {
-            console.error("Supabase client not initialized.");
-        }
 
         // [핵심] 자동 하이픈 생성 함수 (하나로 통합)
         function autoHyphen(target, type) {
@@ -398,45 +385,47 @@
             showPage(pageId, false);
         });
 
-        async function fetchCourses() {
+        function fetchCourses() {
             loadingSpinner.classList.remove('hidden');
             scheduleBody.innerHTML = '';
 
-            // [수정] education_apply 테이블은 관리자만 볼 수 있으므로(RLS), join 시 권한 오류가 발생합니다.
-            // 따라서 익명 사용자도 볼 수 있는 courses 테이블만 단순 조회합니다.
-            const { data, error } = await supabase
-                .from('courses')
-                .select('*');
+            fetch(scriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === 'error') {
+                        loadingSpinner.innerHTML = `<p class="text-red-500 font-bold">오류: ${data.msg}</p>`;
+                        return;
+                    }
 
-            if (error) {
-                console.error("Error:", error);
-                loadingSpinner.innerHTML = `<p class="text-red-500 font-bold">오류: ${error.message}</p>`;
-                return;
-            }
+                    // [정렬 로직 추가] 날짜순 오름차순 정렬
+                    const sortedArray = Object.keys(data).map(key => {
+                        return { id: key, ...data[key] };
+                    }).sort((a, b) => {
+                        // 날짜 문자열 파싱 (예: "2026. 1. 7(수) 14:00~16:00" -> 2026-01-07)
+                        const parseDate = (str) => {
+                            try {
+                                const parts = str.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+                                if (parts) return new Date(`${parts[1]}-${parts[2]}-${parts[3]}`);
+                                return new Date(9999, 11, 31); // 파싱 실패시 뒤로
+                            } catch (e) { return new Date(9999, 11, 31); }
+                        };
+                        return parseDate(a.date) - parseDate(b.date);
+                    });
 
-            // Client-side sorting
-            const sortedArray = data.map(item => {
-                // 신청자 수는 별도 보안 설정 없이는 가져올 수 없으므로 0으로 처리합니다.
-                return { ...item, current: 0 };
-            }).sort((a, b) => {
-                const parseDate = (str) => {
-                    try {
-                        const parts = str.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
-                        if (parts) return new Date(`${parts[1]}-${parts[2]}-${parts[3]}`);
-                        return new Date(9999, 11, 31);
-                    } catch (e) { return new Date(9999, 11, 31); }
-                };
-                return parseDate(a.date) - parseDate(b.date);
-            });
+                    // 정렬된 배열을 다시 객체나 순서대로 렌더링하기 위해 전역 변수는 그대로 두고 렌더링 함수에 정렬된 키 전달
+                    courseData = {};
+                    sortedArray.forEach(item => {
+                        courseData[item.id] = item;
+                    });
 
-            courseData = {};
-            sortedArray.forEach(item => {
-                courseData[item.id] = item;
-            });
-
-            renderLists();
-            renderSchedule();
-            loadingSpinner.classList.add('hidden');
+                    renderLists();
+                    renderSchedule();
+                    loadingSpinner.classList.add('hidden');
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    loadingSpinner.innerHTML = `<p class="text-red-500 font-bold">일정을 불러오지 못했습니다.<br><span class="text-sm font-normal text-gray-500">(관리자: 구글 앱스 스크립트 '권한 설정'을 확인하세요)</span></p>`;
+                });
         }
 
         function renderLists() {
@@ -540,7 +529,6 @@
             const data = courseData[courseId];
             if (!data) return alert('정보 없음');
 
-            document.getElementById('detail-id').value = courseId; // ID 저장
             document.getElementById('detail-category').innerText = data.category;
             document.getElementById('detail-title').innerText = data.title;
             document.getElementById('detail-date').innerText = data.date;
@@ -549,7 +537,7 @@
             document.getElementById('detail-goal').innerText = data.goal;
             document.getElementById('detail-instructor').innerText = data.instructor;
             document.getElementById('detail-content').innerText = data.content;
-            document.getElementById('detail-payment-info').innerText = data.payment_info || "무료 / 별도 문의";
+            document.getElementById('detail-payment-info').innerText = data.paymentInfo || "무료 / 별도 문의";
 
             const capacityEl = document.getElementById('detail-capacity');
             const cap = parseInt(data.capacity || 0);
@@ -570,7 +558,7 @@
                 } else { formattedDeadline = data.deadline; }
             }
             document.getElementById('detail-deadline').innerText = formattedDeadline;
-            document.getElementById('detail-other-info').innerText = data.other_info || "없음";
+            document.getElementById('detail-other-info').innerText = data.otherInfo || "없음";
             document.getElementById('detail-contact').innerText = data.contact || "기업지원부 통상진흥팀 (053-222-3109)";
 
             const btnApply = document.getElementById('btn-apply');
@@ -604,9 +592,7 @@
 
         function openModalFromDetail() {
             const courseTitle = document.getElementById('detail-title').innerText;
-            const courseId = document.getElementById('detail-id').value;
             document.getElementById('modalCourseTitle').value = courseTitle;
-            document.getElementById('modalCourseId').value = courseId;
             document.getElementById('applicationModal').classList.remove('hidden');
         }
 
@@ -615,7 +601,7 @@
             document.getElementById('applyForm').reset();
         }
 
-        async function submitForm() {
+        function submitForm() {
             const form = document.getElementById('applyForm');
             if (!form.checkValidity()) { form.reportValidity(); return; }
 
@@ -624,32 +610,38 @@
             btn.innerText = "접수 중...";
             btn.disabled = true;
 
-            // [수정] education_apply 테이블 스키마에 맞춰 필드명 매핑
-            const applicantData = {
-                course_id: document.getElementById('modalCourseId').value,
-                company: document.getElementById('bizName').value,    // bizName -> company
-                biz_no: document.getElementById('bizNo').value,       // (추가)
-                dept: document.getElementById('deptName').value,      // (추가)
-                position: document.getElementById('position').value,
-                name: document.getElementById('applicantName').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                agree_privacy: document.getElementById('privacy').checked
-            };
+            const formData = new FormData();
+            formData.append('course', document.getElementById('modalCourseTitle').value);
+            formData.append('bizName', document.getElementById('bizName').value);
+            formData.append('bizNo', document.getElementById('bizNo').value);
+            formData.append('dept', document.getElementById('deptName').value);
+            formData.append('position', document.getElementById('position').value);
+            formData.append('name', document.getElementById('applicantName').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('email', document.getElementById('email').value);
 
-            const { error } = await supabase.from('education_apply').insert([applicantData]);
+            const privacyChecked = document.getElementById('privacy').checked;
+            formData.append('privacy', privacyChecked ? "동의함" : "미동의");
 
-            if (error) {
-                alert('오류가 발생했습니다: ' + error.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-            } else {
-                alert(`[신청 완료]\n정상적으로 접수되었습니다.\n담당자가 확인 후 문자로 안내해 드리겠습니다.`);
-                closeModal();
-                fetchCourses(); // 갱신
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            const data = new URLSearchParams(formData);
+
+            fetch(scriptURL, { method: 'POST', body: data })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.result === 'success') {
+                        alert(`[신청 완료]\n정상적으로 접수되었습니다.\n담당자가 확인 후 문자로 안내해 드리겠습니다.`);
+                        closeModal();
+                    } else {
+                        alert('오류가 발생했습니다: ' + result.msg);
+                    }
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    alert('서버 통신 오류가 발생했습니다.');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
         }
     </script>
 </body>
