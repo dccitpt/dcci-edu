@@ -389,7 +389,7 @@
             loadingSpinner.classList.remove('hidden');
             scheduleBody.innerHTML = '';
 
-            fetch(scriptURL)
+            fetch(scriptURL + '?type=public')
                 .then(response => response.json())
                 .then(data => {
                     if (data.result === 'error') {
@@ -625,7 +625,7 @@
 
             const data = new URLSearchParams(formData);
 
-            fetch(scriptURL, { method: 'POST', body: data })
+            fetch(scriptURL + '?type=public', { method: 'POST', body: data })
                 .then(response => response.json())
                 .then(result => {
                     if (result.result === 'success') {
