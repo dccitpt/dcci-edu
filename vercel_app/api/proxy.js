@@ -67,6 +67,52 @@ export default async function handler(req, res) {
       return res.status(502).json({ result: 'error', msg: 'Invalid response from backend', raw: text });
     }
 
+    if (isPublic) {
+      // [Security Policy] Whitelist Filtering for Public Access
+      // 오직 프론트엔드 표시에 필요한 필드만 허용합니다. 민감한 개인정보(name, phone 등)는 원천 차단됩니다.
+      const ALLOWED_FIELDS = [
+        'id', 'category', 'title', 'date', 'place', 'capacity', 'current',
+        'deadline', 'target', 'goal', 'instructor', 'content',
+        'paymentInfo', 'otherInfo', 'contact', 'courseName', 'month', 'status', 'link',
+        'result', 'msg' // 에러 핸들링 및 상태 표시용
+      ];
+
+      if (Array.isArray(data)) {
+        // 데이터가 배열인 경우 (List 형태)
+        data = data.map(item => {
+          const filtered = {};
+          ALLOWED_FIELDS.forEach(field => {
+            if (item[field] !== undefined) filtered[field] = item[field];
+          });
+          return filtered;
+        });
+      } else if (typeof data === 'object' && data !== null) {
+        // 데이터가 객체인 경우 (Dictionary 형태: { "ID": { ... }, "result": "..." })
+        const filteredData = {};
+        Object.keys(data).forEach(key => {
+          // 최상위 키가 result나 msg인 경우 그대로 유지 (시스템 메시지)
+          if (key === 'result' || key === 'msg') {
+            filteredData[key] = data[key];
+            return;
+          }
+
+          const item = data[key];
+          // 값이 객체인 경우 (개별 교육 과정 데이터) -> 필터링 수행
+          if (typeof item === 'object' && item !== null) {
+            const filteredItem = {};
+            ALLOWED_FIELDS.forEach(field => {
+              if (item[field] !== undefined) filteredItem[field] = item[field];
+            });
+            filteredData[key] = filteredItem;
+          } else {
+            // 값이 객체가 아닌 경우 (예: 미확인 플래그 등), 안전하게 제외하거나 필요시 분석 후 추가
+            // 현재는 보안을 위해 제외 (result/msg 제외)
+          }
+        });
+        data = filteredData;
+      }
+    }
+
     res.status(200).json(data);
   } catch (error) {
     console.error('Proxy Error:', error);
