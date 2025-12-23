@@ -395,12 +395,65 @@
                     if (now > deadlineDate) statusBadge = `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">기한마감</span>`;
                 }
 
+                // 신청자 명단 HTML 생성 (J~M열 추가)
+                let applicantsHtml = '';
+                if (item.applicants && item.applicants.length > 0) {
+                    applicantsHtml = `
+                        <div class="bg-gray-50 p-4 rounded-lg m-4 border border-gray-200">
+                            <h4 class="font-bold text-gray-700 mb-2">📋 신청자 명단 (${item.applicants.length}명)</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-xs text-left text-gray-500">
+                                    <thead class="bg-gray-100 text-gray-700 font-bold border-b">
+                                        <tr>
+                                            <th class="px-3 py-2 whitespace-nowrap">시간</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">회사명</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">사업자번호</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">부서/직위</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">성명</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">연락처</th>
+                                            <th class="px-3 py-2 whitespace-nowrap">이메일</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">개인정보</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">회원구분</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">회비납부</th>
+                                            <th class="px-3 py-2 whitespace-nowrap bg-yellow-50">의원구분</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        ${item.applicants.map(app => `
+                                            <tr class="hover:bg-blue-50">
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.timestamp}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900">${app.bizName}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.bizNo}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.dept} ${app.position}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-900">${app.name}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.phone}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap">${app.email}</td>
+                                                
+                                                <!-- 추가 컬럼 J~M (배경색 구분) -->
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 text-gray-600">${app.privacy}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 font-semibold text-blue-600">${app.memberType || '-'}</td>
+                                                
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 font-bold ${(app.feeStatus === '미납' || app.feeStatus === '면제') ? 'text-red-500' : 'text-green-600'
+                        }">${app.feeStatus || '-'}</td>
+                                                
+                                                <td class="px-3 py-2 whitespace-nowrap bg-yellow-50 text-gray-700">${app.councilType || '-'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                } else {
+                    applicantsHtml = `<div class="p-6 text-center text-gray-400">신청자가 없습니다.</div>`;
+                }
+
                 tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50 border-b">
+                    <tr class="hover:bg-blue-50 cursor-pointer transition-colors border-b" onclick="toggleApplicantList('${item.id}')">
                         <td class="px-6 py-4">${statusBadge}</td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-bold text-gray-900 flex items-center">
                                 ${item.title}
+                                <svg id="icon-${item.id}" class="w-4 h-4 ml-2 text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
                             <div class="text-xs text-gray-500">${item.category}</div>
                         </td>
@@ -414,8 +467,24 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-gray-500 text-sm">${item.deadline ? item.deadline.split('T')[0] : '상시/별도'}</td>
+                    </tr>
+                    <tr id="detail-${item.id}" class="hidden bg-gray-50 border-b">
+                        <td colspan="5" class="p-0">
+                            ${applicantsHtml}
+                        </td>
                     </tr>`;
             });
+        }
+
+        function toggleApplicantList(id) {
+            const detailRow = document.getElementById(`detail-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            if (detailRow) {
+                detailRow.classList.toggle('hidden');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+            }
         }
 
         // --- 기능 3: 관리 (수정/삭제) ---
